@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Campaigns – Email Tracker</title>
+  <link rel="stylesheet" href="/css/style.css">
+  <script>window.APP_CONFIG = { apiBase: '' };</script>
+</head>
+<body>
+<div class="layout">
+
+  <!-- Sidebar -->
+  <aside class="sidebar">
+    <div class="sidebar-logo">📧 Email Tracker</div>
+    <nav>
+      <a href="/dashboard.html"><span class="icon">📊</span> Dashboard</a>
+      <a href="/campaigns.html" class="active"><span class="icon">📋</span> Campaigns</a>
+    </nav>
+    <div class="sidebar-footer">
+      <button id="logout-btn" class="btn btn-outline btn-sm" style="width:100%">Sign Out</button>
+    </div>
+  </aside>
+
+  <!-- Main -->
+  <div class="main">
+    <div class="topbar">
+      <h1 id="page-title">Campaigns</h1>
+      <a href="/campaigns.html" class="btn btn-outline btn-sm" id="back-btn" style="display:none">← Back to list</a>
+    </div>
+
+    <div class="page">
+
+      <!-- ══════════ LIST VIEW (no ?id) ══════════ -->
+      <div id="list-view">
+
+        <!-- Create campaign -->
+        <div class="card">
+          <div class="card-header"><h2>New Campaign</h2></div>
+          <div class="card-body">
+            <div id="create-alert" class="alert" style="display:none"></div>
+            <form id="create-form" style="display:flex;gap:12px;flex-wrap:wrap;align-items:flex-end">
+              <div class="form-group" style="flex:1;min-width:200px;margin:0">
+                <label for="c-name">Campaign Name</label>
+                <input type="text" id="c-name" name="name" placeholder="e.g. November Newsletter" required>
+              </div>
+              <div class="form-group" style="flex:2;min-width:280px;margin:0">
+                <label for="c-subject">Email Subject</label>
+                <input type="text" id="c-subject" name="subject" placeholder="e.g. Special offer just for you" required>
+              </div>
+              <button type="submit" class="btn btn-primary">Create Campaign</button>
+            </form>
+          </div>
+        </div>
+
+        <!-- Campaign list -->
+        <div class="card">
+          <div class="card-header"><h2>All Campaigns</h2></div>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr><th>Name</th><th>Subject</th><th>Status</th><th>Sent</th><th>Created</th></tr>
+              </thead>
+              <tbody id="campaigns-tbody">
+                <tr><td colspan="5">Loading…</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+      </div><!-- /list-view -->
+
+
+      <!-- ══════════ DETAIL VIEW (?id=…) ══════════ -->
+      <div id="detail-view" style="display:none">
+
+        <!-- Campaign header -->
+        <div class="card">
+          <div class="card-body" style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px">
+            <div>
+              <h2 id="campaign-title" style="font-size:1.1rem"></h2>
+              <div style="color:#64748b;font-size:.875rem;margin-top:4px">Subject: <span id="campaign-subject"></span></div>
+            </div>
+            <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+              <span class="badge badge-info" id="campaign-status"></span>
+              <div id="status-alert" class="alert" style="display:none;margin:0"></div>
+              <button class="btn btn-outline btn-sm" data-set-status="sending">▶ Mark Sending</button>
+              <button class="btn btn-outline btn-sm" data-set-status="sent">✓ Mark Sent</button>
+              <button class="btn btn-outline btn-sm" data-set-status="paused">⏸ Pause</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Stats row -->
+        <div class="stats-grid">
+          <div class="stat-card"><div class="label">Sent</div><div class="value" id="stat-sent">—</div></div>
+          <div class="stat-card"><div class="label">Unique Opens</div><div class="value" id="stat-opens">—</div></div>
+          <div class="stat-card"><div class="label">Unique Clicks</div><div class="value" id="stat-clicks">—</div></div>
+          <div class="stat-card"><div class="label">Form Submissions</div><div class="value" id="stat-forms">—</div></div>
+          <div class="stat-card"><div class="label">Unsubscribes</div><div class="value" id="stat-unsubscribes">—</div></div>
+        </div>
+
+        <!-- CSV upload -->
+        <div class="card">
+          <div class="card-header"><h2>Upload Recipients (CSV)</h2></div>
+          <div class="card-body">
+            <p style="font-size:.875rem;color:#64748b;margin-bottom:12px">
+              CSV must include an <strong>email</strong> column. Optional columns: <code>first_name</code>, <code>last_name</code>, <code>consent</code> (true/false).
+            </p>
+            <div id="csv-alert" class="alert" style="display:none"></div>
+            <form id="csv-form">
+              <div id="upload-zone" class="upload-zone" style="margin-bottom:12px">
+                <div style="font-size:2rem">📁</div>
+                <p>Drag & drop CSV or click to browse</p>
+                <input type="file" id="csv-file" accept=".csv" style="display:none">
+              </div>
+              <button type="submit" class="btn btn-primary">Upload Recipients</button>
+            </form>
+          </div>
+        </div>
+
+        <!-- Event history -->
+        <div class="card">
+          <div class="card-header">
+            <h2>Event History <span id="events-count" style="font-weight:400;font-size:.85rem;color:#64748b"></span></h2>
+            <div style="display:flex;gap:8px">
+              <button id="export-events" class="btn btn-outline btn-sm">Export Events CSV</button>
+              <button id="export-leads"  class="btn btn-outline btn-sm">Export Leads CSV</button>
+            </div>
+          </div>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr><th>Email</th><th>Event</th><th>URL</th><th>Bot?</th><th>Time</th></tr>
+              </thead>
+              <tbody id="events-tbody">
+                <tr><td colspan="5">Loading…</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+      </div><!-- /detail-view -->
+
+    </div><!-- /page -->
+  </div><!-- /main -->
+</div><!-- /layout -->
+
+<script type="module">
+  import '/js/campaigns.js';
+  // Show correct view based on ?id param
+  const id = new URLSearchParams(location.search).get('id');
+  if (id) {
+    document.getElementById('list-view').style.display   = 'none';
+    document.getElementById('detail-view').style.display = 'block';
+    document.getElementById('back-btn').style.display    = 'inline-flex';
+    document.getElementById('page-title').textContent    = 'Campaign Detail';
+  }
+</script>
+</body>
+</html>

@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Contact Us</title>
+  <link rel="stylesheet" href="/css/style.css">
+  <script>window.APP_CONFIG = { apiBase: '' };</script>
+  <style>
+    body { background: #f1f5f9; }
+    .form-wrap {
+      max-width: 500px; margin: 60px auto; background: #fff;
+      border-radius: 12px; padding: 32px; box-shadow: 0 4px 16px rgba(0,0,0,.08);
+    }
+    .form-wrap h1 { font-size: 1.3rem; margin-bottom: 4px; }
+    .form-wrap .sub { color: #64748b; font-size: .875rem; margin-bottom: 24px; }
+    #success-msg { display: none; text-align: center; padding: 24px 0; }
+    #success-msg h2 { color: #16a34a; margin-bottom: 8px; }
+  </style>
+</head>
+<body>
+
+  <div class="form-wrap">
+    <div id="form-area">
+      <h1>Get in Touch</h1>
+      <p class="sub">Fill in the form below and we'll get back to you.</p>
+
+      <div id="form-alert" class="alert" style="display:none"></div>
+
+      <form id="contact-form" novalidate>
+        <div class="form-group">
+          <label for="first_name">First Name</label>
+          <input type="text" id="first_name" name="first_name">
+        </div>
+        <div class="form-group">
+          <label for="last_name">Last Name</label>
+          <input type="text" id="last_name" name="last_name">
+        </div>
+        <div class="form-group">
+          <label for="phone">Phone</label>
+          <input type="tel" id="phone" name="phone">
+        </div>
+        <div class="form-group">
+          <label for="company">Company</label>
+          <input type="text" id="company" name="company">
+        </div>
+        <div class="form-group">
+          <label for="message">Message</label>
+          <textarea id="message" name="message"></textarea>
+        </div>
+
+        <!-- Consent checkbox for IP collection -->
+        <div class="form-group form-check" style="background:#f8fafc;padding:12px;border-radius:8px;border:1px solid #e2e8f0">
+          <input type="checkbox" id="ip_consent" name="ip_consent">
+          <label for="ip_consent">
+            I agree to allow this website to record my IP address for security and fraud prevention purposes.
+            <span style="font-size:.78rem;color:#64748b;display:block;margin-top:4px">
+              Your IP address will only be stored if you check this box.
+            </span>
+          </label>
+        </div>
+
+        <button type="submit" class="btn btn-primary" style="width:100%;margin-top:16px">Submit</button>
+      </form>
+    </div>
+
+    <div id="success-msg">
+      <div style="font-size:3rem">✅</div>
+      <h2>Thank you!</h2>
+      <p>Your message has been received. We'll be in touch soon.</p>
+    </div>
+  </div>
+
+  <script type="module">
+    // The token comes from the URL: form.html?t=RECIPIENT_TOKEN
+    const token = new URLSearchParams(location.search).get('t');
+    // Use ?? (nullish coalescing) not || so that '' (empty string) is kept as-is.
+    // On Vercel apiBase is '' which means relative URLs – same domain.
+    const API_BASE = window.APP_CONFIG?.apiBase ?? '';
+
+    if (!token) {
+      document.getElementById('form-alert').className = 'alert alert-error';
+      document.getElementById('form-alert').textContent = 'Invalid form link. Please use the link from your email.';
+      document.getElementById('form-alert').style.display = 'block';
+      document.getElementById('contact-form').style.display = 'none';
+    }
+
+    document.getElementById('contact-form')?.addEventListener('submit', async e => {
+      e.preventDefault();
+      const btn = e.target.querySelector('button[type="submit"]');
+      btn.disabled = true;
+      btn.textContent = 'Sending…';
+
+      const alertEl = document.getElementById('form-alert');
+      alertEl.style.display = 'none';
+
+      const payload = {
+        first_name:  document.getElementById('first_name').value.trim() || null,
+        last_name:   document.getElementById('last_name').value.trim()  || null,
+        phone:       document.getElementById('phone').value.trim()       || null,
+        company:     document.getElementById('company').value.trim()     || null,
+        message:     document.getElementById('message').value.trim()     || null,
+        ip_consent:  document.getElementById('ip_consent').checked
+      };
+
+      try {
+        const res  = await fetch(`${API_BASE}/track/form/${token}`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+        const json = await res.json();
+        if (!res.ok) throw new Error(json.error || 'Submission failed');
+
+        document.getElementById('form-area').style.display    = 'none';
+        document.getElementById('success-msg').style.display = 'block';
+      } catch (err) {
+        alertEl.className   = 'alert alert-error';
+        alertEl.textContent = err.message;
+        alertEl.style.display = 'block';
+        btn.disabled = false;
+        btn.textContent = 'Submit';
+      }
+    });
+  </script>
+
+</body>
+</html>

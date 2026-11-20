@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dashboard – Email Tracker</title>
+  <link rel="stylesheet" href="/css/style.css">
+  <script>window.APP_CONFIG = { apiBase: '' };</script>
+</head>
+<body>
+<div class="layout">
+
+  <!-- Sidebar -->
+  <aside class="sidebar">
+    <div class="sidebar-logo">📧 Email Tracker</div>
+    <nav>
+      <a href="/dashboard.html" class="active"><span class="icon">📊</span> Dashboard</a>
+      <a href="/campaigns.html"><span class="icon">📋</span> Campaigns</a>
+    </nav>
+    <div class="sidebar-footer">
+      <button id="logout-btn" class="btn btn-outline btn-sm" style="width:100%">Sign Out</button>
+    </div>
+  </aside>
+
+  <!-- Main -->
+  <div class="main">
+    <div class="topbar">
+      <h1>Dashboard</h1>
+    </div>
+
+    <div class="page">
+
+      <!-- Summary stats -->
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="label">Total Campaigns</div>
+          <div class="value" id="stat-campaigns">—</div>
+        </div>
+        <div class="stat-card">
+          <div class="label">Emails Sent</div>
+          <div class="value" id="stat-sent">—</div>
+        </div>
+        <div class="stat-card">
+          <div class="label">Unique Opens</div>
+          <div class="value" id="stat-opens">—</div>
+          <div class="sub">human, non-bot</div>
+        </div>
+        <div class="stat-card">
+          <div class="label">Unique Clicks</div>
+          <div class="value" id="stat-clicks">—</div>
+          <div class="sub">human, non-bot</div>
+        </div>
+        <div class="stat-card">
+          <div class="label">Form Submissions</div>
+          <div class="value" id="stat-forms">—</div>
+        </div>
+      </div>
+
+      <!-- Recent campaigns -->
+      <div class="card">
+        <div class="card-header">
+          <h2>Recent Campaigns</h2>
+          <a href="/campaigns.html" class="btn btn-outline btn-sm">View all</a>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Name</th><th>Subject</th><th>Status</th><th>Sent</th><th>Created</th>
+              </tr>
+            </thead>
+            <tbody id="campaigns-tbody">
+              <tr><td colspan="5">Loading…</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+    </div><!-- /page -->
+  </div><!-- /main -->
+</div><!-- /layout -->
+
+<script type="module" src="/js/dashboard.js"></script>
+</body>
+</html>
